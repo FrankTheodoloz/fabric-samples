@@ -1,7 +1,7 @@
 {
-    "name": "asset-transfer-basic",
-    "version": "1.0.0",
-    "description": "Asset Transfer Basic Application implemented in typeScript using fabric-gateway",
+    "name": "data-sharing",
+    "version": "0.0.1",
+    "description": "Data Sharing Application implemented in typeScript using fabric-gateway based on Asset Transfer Basic",
     "main": "dist/index.js",
     "typings": "dist/index.d.ts",
     "engines": {
@@ -16,7 +16,7 @@
         "start": "node dist/app.js"
     },
     "engineStrict": true,
-    "author": "Hyperledger",
+    "author": "Frank Théodoloz",
     "license": "Apache-2.0",
     "dependencies": {
         "@grpc/grpc-js": "~1.6.7",
