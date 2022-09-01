@@ -15,54 +15,60 @@ export class DataSharingContract extends Contract {
         const assets: Asset[] = [
             {
                 ID: 'asset1',
-                Color: 'blue',
+                Filename: 'asset1.txt',
                 Size: 5,
-                Owner: 'Tomoko',
-                AppraisedValue: 300,
+                Hash: 'asset1Hash',
+                Sender: 'Tomoko',
+                UploadDate: Date.UTC(2021, 12, 5, 13, 56, 0, 0),
             },
             {
                 ID: 'asset2',
-                Color: 'red',
+                Filename: 'asset2.pdf',
                 Size: 5,
-                Owner: 'Brad',
-                AppraisedValue: 400,
+                Hash: 'asset2Hash',
+                Sender: 'Brad',
+                UploadDate: Date.UTC(2021, 12, 21, 9, 12, 0, 0),
             },
             {
                 ID: 'asset3',
-                Color: 'green',
+                Filename: 'asset3.gif',
                 Size: 10,
-                Owner: 'Jin Soo',
-                AppraisedValue: 500,
+                Hash: 'asset3Hash',
+                Sender: 'Jin Soo',
+                UploadDate: Date.UTC(2022, 2, 19, 18, 5, 0, 0),
             },
             {
                 ID: 'asset4',
-                Color: 'yellow',
+                Filename: 'asset4.zip',
                 Size: 10,
-                Owner: 'Max',
-                AppraisedValue: 600,
+                Hash: 'asset4Hash',
+                Sender: 'Max',
+                UploadDate: Date.UTC(2022, 3, 19, 11, 18, 0, 0),
             },
             {
                 ID: 'asset5',
-                Color: 'black',
+                Filename: 'asset5.doc',
                 Size: 15,
-                Owner: 'Adriana',
-                AppraisedValue: 700,
+                Hash: 'asset5Hash',
+                Sender: 'Adriana',
+                UploadDate: Date.UTC(2022, 3, 24, 1, 45, 0, 0),
             },
             {
                 ID: 'asset6',
-                Color: 'white',
+                Filename: 'asset6.mp3',
                 Size: 15,
-                Owner: 'Michel',
-                AppraisedValue: 800,
+                Hash: 'asset6Hash',
+                Sender: 'Michel',
+                UploadDate: Date.UTC(2022, 7, 3, 17, 5, 0, 0),
             },
         ];
 
         for (const asset of assets) {
-            asset.docType = 'asset';
+            // asset.docType = 'asset';
             // example of how to write to world state deterministically
-            // use convetion of alphabetic order
+            // use convention of alphabetic order
             // we insert data in alphabetic order using 'json-stringify-deterministic' and 'sort-keys-recursive'
-            // when retrieving data, in any lang, the order of data will be the same and consequently also the corresonding hash
+            // when retrieving data, in any lang, the order of data will be the same and consequently also the corresponding hash
             await ctx.stub.putState(asset.ID, Buffer.from(stringify(sortKeysRecursive(asset))));
             console.info(`Asset ${asset.ID} initialized`);
         }
@@ -70,7 +76,7 @@ export class DataSharingContract extends Contract {
 
     // CreateAsset issues a new asset to the world state with given details.
     @Transaction()
-    public async CreateAsset(ctx: Context, id: string, color: string, size: number, owner: string, appraisedValue: number): Promise<void> {
+    public async CreateAsset(ctx: Context, id: string, filename: string, size: number, hash: string, sender: string): Promise<void> {
         const exists = await this.AssetExists(ctx, id);
         if (exists) {
             throw new Error(`The asset ${id} already exists`);
@@ -78,10 +84,11 @@ export class DataSharingContract extends Contract {
 
         const asset = {
             ID: id,
-            Color: color,
+            Filename: filename,
             Size: size,
-            Owner: owner,
-            AppraisedValue: appraisedValue,
+            Hash: hash,
+            Sender: sender,
+            UploadDate: Date.now(),
         };
         // we insert data in alphabetic order using 'json-stringify-deterministic' and 'sort-keys-recursive'
         await ctx.stub.putState(id, Buffer.from(stringify(sortKeysRecursive(asset))));
@@ -99,7 +106,7 @@ export class DataSharingContract extends Contract {
 
     // UpdateAsset updates an existing asset in the world state with provided parameters.
     @Transaction()
-    public async UpdateAsset(ctx: Context, id: string, color: string, size: number, owner: string, appraisedValue: number): Promise<void> {
+    public async UpdateAsset(ctx: Context, id: string, filename: string, size: number, hash: string, sender: string): Promise<void> {
         const exists = await this.AssetExists(ctx, id);
         if (!exists) {
             throw new Error(`The asset ${id} does not exist`);
@@ -108,16 +115,17 @@ export class DataSharingContract extends Contract {
         // overwriting original asset with new asset
         const updatedAsset = {
             ID: id,
-            Color: color,
+            Filename: filename,
             Size: size,
-            Owner: owner,
-            AppraisedValue: appraisedValue,
+            Hash: hash,
+            Sender: sender,
+            UploadDate: Date.now(),
         };
         // we insert data in alphabetic order using 'json-stringify-deterministic' and 'sort-keys-recursive'
         return ctx.stub.putState(id, Buffer.from(stringify(sortKeysRecursive(updatedAsset))));
     }
 
-    // DeleteAsset deletes an given asset from the world state.
+    // DeleteAsset deletes a given asset from the world state.
     @Transaction()
     public async DeleteAsset(ctx: Context, id: string): Promise<void> {
         const exists = await this.AssetExists(ctx, id);
@@ -136,16 +144,16 @@ export class DataSharingContract extends Contract {
     }
 
     // TransferAsset updates the owner field of asset with given id in the world state, and returns the old owner.
-    @Transaction()
-    public async TransferAsset(ctx: Context, id: string, newOwner: string): Promise<string> {
-        const assetString = await this.ReadAsset(ctx, id);
-        const asset = JSON.parse(assetString);
-        const oldOwner = asset.Owner;
-        asset.Owner = newOwner;
-        // we insert data in alphabetic order using 'json-stringify-deterministic' and 'sort-keys-recursive'
-        await ctx.stub.putState(id, Buffer.from(stringify(sortKeysRecursive(asset))));
-        return oldOwner;
-    }
+    // @Transaction()
+    // public async TransferAsset(ctx: Context, id: string, newOwner: string): Promise<string> {
+    //     const assetString = await this.ReadAsset(ctx, id);
+    //     const asset = JSON.parse(assetString);
+    //     const oldOwner = asset.Owner;
+    //     asset.Owner = newOwner;
+    //     // we insert data in alphabetic order using 'json-stringify-deterministic' and 'sort-keys-recursive'
+    //     await ctx.stub.putState(id, Buffer.from(stringify(sortKeysRecursive(asset))));
+    //     return oldOwner;
+    // }
 
     // GetAllAssets returns all assets found in the world state.
     @Transaction(false)
