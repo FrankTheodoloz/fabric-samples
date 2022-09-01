@@ -7,8 +7,8 @@ import stringify from 'json-stringify-deterministic';
 import sortKeysRecursive from 'sort-keys-recursive';
 import {Asset} from './asset';
 
-@Info({title: 'AssetTransfer', description: 'Smart contract for trading assets'})
-export class AssetTransferContract extends Contract {
+@Info({title: 'DataSharing', description: 'Smart contract for Data Sharing'})
+export class DataSharingContract extends Contract {
 
     @Transaction()
     public async InitLedger(ctx: Context): Promise<void> {

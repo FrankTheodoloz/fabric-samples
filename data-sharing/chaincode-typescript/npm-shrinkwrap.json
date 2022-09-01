@@ -1,12 +1,12 @@
 {
-    "name": "asset-transfer-basic",
-    "version": "1.0.0",
+    "name": "data-sharing",
+    "version": "0.0.1",
     "lockfileVersion": 2,
     "requires": true,
     "packages": {
         "": {
-            "name": "asset-transfer-basic",
-            "version": "1.0.0",
+            "name": "data-sharing",
+            "version": "0.0.1",
             "license": "Apache-2.0",
             "dependencies": {
                 "fabric-contract-api": "^2.4.0",
