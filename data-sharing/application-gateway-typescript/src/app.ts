@@ -5,14 +5,14 @@
  */
 
 import * as grpc from '@grpc/grpc-js';
-import { connect, Contract, Identity, Signer, signers } from '@hyperledger/fabric-gateway';
+import {connect, Contract, Identity, Signer, signers} from '@hyperledger/fabric-gateway';
 import * as crypto from 'crypto';
-import { promises as fs } from 'fs';
+import {promises as fs} from 'fs';
 import * as path from 'path';
-import { TextDecoder } from 'util';
+import {TextDecoder} from 'util';
 
 const channelName = envOrDefault('CHANNEL_NAME', 'mychannel');
-const chaincodeName = envOrDefault('CHAINCODE_NAME', 'basic');
+const chaincodeName = envOrDefault('CHAINCODE_NAME', 'datasharing');
 const mspId = envOrDefault('MSP_ID', 'Org1MSP');
 
 // Path to crypto materials.
@@ -34,7 +34,7 @@ const peerEndpoint = envOrDefault('PEER_ENDPOINT', 'localhost:7051');
 const peerHostAlias = envOrDefault('PEER_HOST_ALIAS', 'peer0.org1.example.com');
 
 const utf8Decoder = new TextDecoder();
-const assetId = `asset${Date.now()}`;
+const assetId = `asset7`;
 
 async function main(): Promise<void> {
 
@@ -49,16 +49,16 @@ async function main(): Promise<void> {
         signer: await newSigner(),
         // Default timeouts for different gRPC calls
         evaluateOptions: () => {
-            return { deadline: Date.now() + 5000 }; // 5 seconds
+            return {deadline: Date.now() + 5000}; // 5 seconds
         },
         endorseOptions: () => {
-            return { deadline: Date.now() + 15000 }; // 15 seconds
+            return {deadline: Date.now() + 15000}; // 15 seconds
         },
         submitOptions: () => {
-            return { deadline: Date.now() + 5000 }; // 5 seconds
+            return {deadline: Date.now() + 5000}; // 5 seconds
         },
         commitStatusOptions: () => {
-            return { deadline: Date.now() + 60000 }; // 1 minute
+            return {deadline: Date.now() + 60000}; // 1 minute
         },
     });
 
@@ -79,7 +79,13 @@ async function main(): Promise<void> {
         await createAsset(contract);
 
         // Update an existing asset asynchronously.
-        await transferAssetAsync(contract);
+        // await transferAssetAsync(contract);
+
+        // Get the asset details by assetID.
+        await readAssetByID(contract);
+
+        // Update an existing asset asynchronously.
+        await updateAsset(contract);
 
         // Get the asset details by assetID.
         await readAssetByID(contract);
@@ -107,7 +113,7 @@ async function newGrpcConnection(): Promise<grpc.Client> {
 
 async function newIdentity(): Promise<Identity> {
     const credentials = await fs.readFile(certPath);
-    return { mspId, credentials };
+    return {mspId, credentials};
 }
 
 async function newSigner(): Promise<Signer> {
@@ -147,15 +153,16 @@ async function getAllAssets(contract: Contract): Promise<void> {
  * Submit a transaction synchronously, blocking until it has been committed to the ledger.
  */
 async function createAsset(contract: Contract): Promise<void> {
-    console.log('\n--> Submit Transaction: CreateAsset, creates new asset with ID, Color, Size, Owner and AppraisedValue arguments');
+    console.log('\n--> Submit Transaction: CreateAsset, creates new asset with id, filename:, size, hash, sender');
 
+    // CreateAsset(ctx: Context, id: string, filename: string, size: number, hash: string, sender: string)
     await contract.submitTransaction(
         'CreateAsset',
         assetId,
-        'yellow',
+        'testGateway.txt',
         '5',
+        assetId + 'Hash',
         'Tom',
-        '1300',
     );
 
     console.log('*** Transaction committed successfully');
@@ -184,9 +191,29 @@ async function transferAssetAsync(contract: Contract): Promise<void> {
     console.log('*** Transaction committed successfully');
 }
 
+/**
+ * Submit a transaction synchronously, blocking until it has been committed to the ledger.
+ */
+async function updateAsset(contract: Contract): Promise<void> {
+    console.log('\n--> Submit Transaction: CreateAsset, creates new asset with ID, Color, Size, Owner and AppraisedValue arguments');
+
+    // UpdateAsset(ctx: Context, id: string, filename: string, size: number, hash: string, sender: string)
+    await contract.submitTransaction(
+        'UpdateAsset',
+        assetId,
+        'testGateway_updated.txt',
+        '23',
+        assetId + 'Hash_updated',
+        'Tom',
+    );
+
+    console.log('*** Transaction committed successfully');
+}
+
 async function readAssetByID(contract: Contract): Promise<void> {
     console.log('\n--> Evaluate Transaction: ReadAsset, function returns asset attributes');
 
+    // ReadAsset(ctx: Context, id: string)
     const resultBytes = await contract.evaluateTransaction('ReadAsset', assetId);
 
     const resultJson = utf8Decoder.decode(resultBytes);
@@ -197,17 +224,18 @@ async function readAssetByID(contract: Contract): Promise<void> {
 /**
  * submitTransaction() will throw an error containing details of any error responses from the smart contract.
  */
-async function updateNonExistentAsset(contract: Contract): Promise<void>{
+async function updateNonExistentAsset(contract: Contract): Promise<void> {
     console.log('\n--> Submit Transaction: UpdateAsset asset70, asset70 does not exist and should return an error');
 
+    // UpdateAsset(ctx: Context, id: string, filename: string, size: number, hash: string, sender: string)
     try {
         await contract.submitTransaction(
             'UpdateAsset',
             'asset70',
-            'blue',
+            'testGateway_KO.txt',
             '5',
-            'Tomoko',
-            '300',
+            'asset70Hash',
+            'Tom',
         );
         console.log('******** FAILED to return an error');
     } catch (error) {
