@@ -1,7 +1,7 @@
 {
-    "name": "asset-transfer-basic",
-    "version": "1.0.0",
-    "description": "Asset Transfer Basic contract implemented in TypeScript",
+    "name": "data-sharing",
+    "version": "0.0.1",
+    "description": "Data Sharing contract implemented in TypeScript based on Asset Transfer Basic",
     "main": "dist/index.js",
     "typings": "dist/index.d.ts",
     "engines": {
@@ -17,7 +17,7 @@
         "prepublishOnly": "npm run build"
     },
     "engineStrict": true,
-    "author": "Hyperledger",
+    "author": "Frank Théodoloz",
     "license": "Apache-2.0",
     "dependencies": {
         "fabric-ca-client": "^2.2.4",
